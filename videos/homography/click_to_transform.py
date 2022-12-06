@@ -53,6 +53,7 @@ def run(image: str = None, background: str = None, inverse: bool = False):
     points = []
     cv2.setMouseCallback(window_name, on_mouse_event, (w, h, points, Hs, inverse))
 
+    colors = [(35, 59, 194), (39, 154, 243), (60, 192, 3), (190, 154, 87)]
     while True:
         render_target = background.copy()
 
@@ -61,10 +62,16 @@ def run(image: str = None, background: str = None, inverse: bool = False):
             warped_mask = cv2.warpPerspective(np.ones(image.shape), H, (bw, bh))
             warped_image = cv2.warpPerspective(image, H, (bw, bh))
             np.putmask(render_target, warped_mask, warped_image)
+
+            image_bounds = [(0, 0), (w, 0), (w, h), (0, h)]
+
+            for i, (x, y) in enumerate(image_bounds):
+                p = np.dot(H, np.array((x, y, 1)))
+                p = p[:-1] / p[-1]
+                cv2.circle(render_target, p.astype(int).tolist(), 3, colors[i], -1)
+
             if len(Hs) > 1:
                 Hs.pop(0)
-
-        colors = [(35, 59, 194), (39, 154, 243), (60, 192, 3), (190, 154, 87)]
 
         for i, p in enumerate(points):
             cv2.drawMarker(
