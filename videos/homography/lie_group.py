@@ -9,55 +9,25 @@ class Euclidean:
     @staticmethod
     def generators() -> List[np.array]:
         return [
-            np.array([
-                [0, -1, 0],
-                [1, 0, 0],
-                [0, 0, 0]
-            ]),
-            np.array([
-                [0, 0, 1],
-                [0, 0, 0],
-                [0, 0, 0]
-            ]),
-            np.array([
-                [0, 0, 0],
-                [0, 0, 1],
-                [0, 0, 0]
-            ])
+            np.array([[0, -1, 0], [1, 0, 0], [0, 0, 0]]),
+            np.array([[0, 0, 1], [0, 0, 0], [0, 0, 0]]),
+            np.array([[0, 0, 0], [0, 0, 1], [0, 0, 0]]),
         ]
 
 
 class Similarity:
     @staticmethod
     def generators() -> List[np.array]:
-        return Euclidean.generators() + [
-            np.array([
-                [0, 0, 0],
-                [0, 0, 0],
-                [0, 0, -1]
-            ])
-        ]
+        return Euclidean.generators() + [np.array([[0, 0, 0], [0, 0, 0], [0, 0, -1]])]
 
 
 class Affine:
     @staticmethod
     def generators() -> List[np.array]:
         return Euclidean.generators() + [
-            np.array([
-                [1, 0, 0],
-                [0, 1, 0],
-                [0, 0, 0]
-            ]),
-            np.array([
-                [1, 0, 0],
-                [0, -1, 0],
-                [0, 0, 0]
-            ]),
-            np.array([
-                [0, 1, 0],
-                [1, 0, 0],
-                [0, 0, 0]
-            ])
+            np.array([[1, 0, 0], [0, 1, 0], [0, 0, 0]]),
+            np.array([[1, 0, 0], [0, -1, 0], [0, 0, 0]]),
+            np.array([[0, 1, 0], [1, 0, 0], [0, 0, 0]]),
         ]
 
 
@@ -65,39 +35,26 @@ class Homography:
     @staticmethod
     def generators() -> List[np.array]:
         return Euclidean.generators() + [
-            np.array([
-                [1, 0, 0],
-                [0, 1, 0],
-                [0, 0, -2]
-            ]),
-            np.array([
-                [1, 0, 0],
-                [0, -1, 0],
-                [0, 0, 0]
-            ]),
-            np.array([
-                [0, 1, 0],
-                [1, 0, 0],
-                [0, 0, 0]
-            ]),
-            np.array([
-                [0, 0, 0],
-                [0, 0, 0],
-                [1, 0, 0]
-            ]),
-            np.array([
-                [0, 0, 0],
-                [0, 0, 0],
-                [0, 1, 0]
-            ])
+            np.array([[1, 0, 0], [0, 1, 0], [0, 0, -2]]),
+            np.array([[1, 0, 0], [0, -1, 0], [0, 0, 0]]),
+            np.array([[0, 1, 0], [1, 0, 0], [0, 0, 0]]),
+            np.array([[0, 0, 0], [0, 0, 0], [1, 0, 0]]),
+            np.array([[0, 0, 0], [0, 0, 0], [0, 1, 0]]),
         ]
 
 
 class LieGroup:
     @staticmethod
+    def exp(group, v: np.array):
+        gens = group.generators()
+        N = len(gens)
+        assert len(v) == N
+        return np.real(expm(sum(v[i] * gens[i] for i in range(N))))
+
+    @staticmethod
     def interpolate(A, B, t) -> np.array:
         Ainv = np.linalg.inv(A)
-        return A.dot(expm(logm(Ainv.dot(B)) * t))
+        return np.real(A.dot(expm(logm(Ainv.dot(B)) * t)))
 
     @staticmethod
     def random(group, gaussians: List[Gaussian] = None) -> np.array:
@@ -109,4 +66,4 @@ class LieGroup:
             assert len(gaussians) == N
             r = np.array([g.sample() for g in gaussians])
 
-        return expm(sum(r[i] * gens[i] for i in range(N)))
+        return np.real(expm(sum(r[i] * gens[i] for i in range(N))))

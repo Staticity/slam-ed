@@ -51,3 +51,6 @@ docs/_build/
 
 # OSX cache
 .DS_STORE
+
+# VS Code
+.vscode
