@@ -37,12 +37,13 @@ def run(image: str = None, background: str = None):
     )
     h, w = image.shape[:2]
 
+    has_background = background is not None
     background = (
         cv2.imread(background) if background else np.zeros(image.shape).astype(np.uint8)
     )
     bh, bw = background.shape[:2]
 
-    Hs = []
+    Hs = [] if has_background else [np.identity(3)]
     points = []
     cv2.setMouseCallback(window_name, on_mouse_event, (w, h, points, Hs))
 
