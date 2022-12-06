@@ -10,7 +10,7 @@ def on_mouse_event(event, x, y, flags, params):
     if event != cv2.EVENT_LBUTTONDOWN:
         return
 
-    w, h, points, Hs = params
+    w, h, points, Hs, inverse = params
     if len(points) >= 4:
         points.clear()
     points.append(np.array((x, y)))
@@ -18,15 +18,21 @@ def on_mouse_event(event, x, y, flags, params):
     if len(points) == 4:
         image_bounds = np.array([(0, 0), (w, 0), (w, h), (0, h)])
         H_new, _ = cv2.findHomography(image_bounds, np.array(points))
+        if inverse:
+            H_new = np.linalg.inv(H_new)
         H_last = Hs[-1] if Hs else np.identity(3)
-        for t in np.linspace(0, 1, num=120, endpoint=True):
+        for t in np.linspace(0, 1, num=60, endpoint=True):
             Hs.append(LieGroup.interpolate(H_last, H_new, t))
+
+        if inverse:
+            points.clear()
 
 
 @click.command()
 @click.option("--image", help="Image to warp")
 @click.option("--background", help="Optional background image")
-def run(image: str = None, background: str = None):
+@click.option("--inverse", is_flag=True, default=False)
+def run(image: str = None, background: str = None, inverse: bool = False):
     window_name = f"Smooth Homography"
     cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
 
@@ -45,7 +51,7 @@ def run(image: str = None, background: str = None):
 
     Hs = [] if has_background else [np.identity(3)]
     points = []
-    cv2.setMouseCallback(window_name, on_mouse_event, (w, h, points, Hs))
+    cv2.setMouseCallback(window_name, on_mouse_event, (w, h, points, Hs, inverse))
 
     while True:
         render_target = background.copy()
