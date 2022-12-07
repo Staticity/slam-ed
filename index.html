@@ -20,6 +20,16 @@
             <input type="text" id="x1_text" size="3" value="0" />
             <input type="range" id="x2" value="0" min="-1000" max="1000" step="1" oninput="callback()">
             <input type="text" id="x2_text" size="3" value="0" />
+            <input type="range" id="x3" value="0" min="-1000" max="1000" step="1" oninput="callback()">
+            <input type="text" id="x3_text" size="3" value="0" />
+            <input type="range" id="x4" value="0" min="-1000" max="1000" step="1" oninput="callback()">
+            <input type="text" id="x4_text" size="3" value="0" />
+            <input type="range" id="x5" value="0" min="-1000" max="1000" step="1" oninput="callback()">
+            <input type="text" id="x5_text" size="3" value="0" />
+            <input type="range" id="x6" value="0" min="-1000" max="1000" step="1" oninput="callback()">
+            <input type="text" id="x6_text" size="3" value="0" />
+            <input type="range" id="x7" value="0" min="-1000" max="1000" step="1" oninput="callback()">
+            <input type="text" id="x7_text" size="3" value="0" />
             <canvas id="canvasOutput"></canvas>
         </div>
     </div>
@@ -42,14 +52,29 @@
             let x0 = document.getElementById('x0');
             let x1 = document.getElementById('x1');
             let x2 = document.getElementById('x2');
+            let x3 = document.getElementById('x3');
+            let x4 = document.getElementById('x4');
+            let x5 = document.getElementById('x5');
+            let x6 = document.getElementById('x6');
+            let x7 = document.getElementById('x7');
 
             x0_text.setAttribute('value', x0.value);
             x1_text.setAttribute('value', x1.value);
             x2_text.setAttribute('value', x2.value);
+            x3_text.setAttribute('value', x3.value);
+            x4_text.setAttribute('value', x4.value);
+            x5_text.setAttribute('value', x5.value);
+            x6_text.setAttribute('value', x6.value);
+            x7_text.setAttribute('value', x7.value);
 
             let G0 = math.multiply(math.matrix([[0, -1, 0], [1, 0, 0], [0, 0, 0]]), x0.value / 100);
             let G1 = math.multiply(math.matrix([[0, 0, 1], [0, 0, 0], [0, 0, 0]]), x1.value);
             let G2 = math.multiply(math.matrix([[0, 0, 0], [0, 0, 1], [0, 0, 0]]), x2.value);
+            let G3 = math.multiply(math.matrix([[1, 0, 0], [0, 1, 0], [0, 0, -2]]), x3.value / 1e3);
+            let G4 = math.multiply(math.matrix([[1, 0, 0], [0, -1, 0], [0, 0, 0]]), x4.value / 1e3);
+            let G5 = math.multiply(math.matrix([[0, 1, 0], [1, 0, 0], [0, 0, 0]]), x5.value / 1e3);
+            let G6 = math.multiply(math.matrix([[0, 0, 0], [0, 0, 0], [1, 0, 0]]), x6.value / 3e5);
+            let G7 = math.multiply(math.matrix([[0, 0, 0], [0, 0, 0], [0, 1, 0]]), x7.value / 3e5);
 
             let H_center = math.matrix([
                 [1, 0, -src.cols / 2.0],
@@ -62,7 +87,10 @@
                 [0, 0, 1],
             ]);
 
-            let e = math.multiply(H_center_inv, math.expm(math.add(G0, G1, G2)), H_center);
+            let e = math.multiply(
+                H_center_inv,
+                math.expm(math.add(G0, G1, G2, G3, G4, G5, G6, G7)),
+                H_center);
 
             let H = cv.matFromArray(3, 3, cv.CV_64FC1, [
                 e.get([0, 0]),
