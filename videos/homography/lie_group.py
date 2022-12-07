@@ -54,7 +54,7 @@ class LieGroup:
     @staticmethod
     def interpolate(A, B, t) -> np.array:
         Ainv = np.linalg.inv(A)
-        return np.real(A.dot(expm(logm(Ainv.dot(B)) * t)))
+        return A.dot(expm(np.real(logm(Ainv.dot(B)) * t)))
 
     @staticmethod
     def random(group, gaussians: List[Gaussian] = None) -> np.array:

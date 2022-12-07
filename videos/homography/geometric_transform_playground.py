@@ -45,8 +45,6 @@ def run(user_image: str = None):
         group = globals()[group_name]
         N = len(group.generators())
         H = LieGroup.exp(group, v[:N])
-        Hinv = np.linalg.inv(H)
-        Hinv *= 1.0 / Hinv[2, 2] or 1
         image_warped = cv2.warpPerspective(
             image,
             center_homography(H, w / 2, h / 2),
