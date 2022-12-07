@@ -3,50 +3,76 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Hello OpenCV.js</title>
+    <title>SLAM-ed</title>
 </head>
 
 <body>
-    <h2>SLAM Education</h2>
+    <h1>SLAM Education</h1>
     <div>
+        <h2>Homography Playground</h2>
+        <p>The following is a sandbox to mess around with a Homography's 8 degrees of freedom. Each degree of freedom
+            cannot be represented by any combination of the others! Try and learn how each degree transforms the
+            checkerboard.
+        </p>
         <div class="inputoutput">
-            <img id="imageSrc" alt="No Image" hidden />
-            <div class="caption"><input type="file" id="fileInput" name="file" /></div>
+            <img id="imageSrc" alt="No Image" src="videos/homography/assets/checkerboard.jpg" hidden />
         </div>
         <div class="inputoutput">
+            <input type="button" value="reset" onclick="reset()" />
+            <br />
+            <label for="x0">x0</label>
             <input type="range" id="x0" value="0" min="-1000" max="1000" step="1" oninput="callback()">
-            <input type="text" id="x0_text" size="3" value="0" />
+            <input type="text" id="x0_text" size="3" value="0" disabled />
+            <br />
+            <label for="x0">x1</label>
             <input type="range" id="x1" value="0" min="-1000" max="1000" step="1" oninput="callback()">
-            <input type="text" id="x1_text" size="3" value="0" />
+            <input type="text" id="x1_text" size="3" value="0" disabled />
+            <br />
+            <label for="x0">x2</label>
             <input type="range" id="x2" value="0" min="-1000" max="1000" step="1" oninput="callback()">
-            <input type="text" id="x2_text" size="3" value="0" />
+            <input type="text" id="x2_text" size="3" value="0" disabled />
+            <br />
+            <label for="x0">x3</label>
             <input type="range" id="x3" value="0" min="-1000" max="1000" step="1" oninput="callback()">
-            <input type="text" id="x3_text" size="3" value="0" />
+            <input type="text" id="x3_text" size="3" value="0" disabled />
+            <br />
+            <label for="x0">x4</label>
             <input type="range" id="x4" value="0" min="-1000" max="1000" step="1" oninput="callback()">
-            <input type="text" id="x4_text" size="3" value="0" />
+            <input type="text" id="x4_text" size="3" value="0" disabled />
+            <br />
+            <label for="x0">x5</label>
             <input type="range" id="x5" value="0" min="-1000" max="1000" step="1" oninput="callback()">
-            <input type="text" id="x5_text" size="3" value="0" />
+            <input type="text" id="x5_text" size="3" value="0" disabled />
+            <br />
+            <label for="x0">x6</label>
             <input type="range" id="x6" value="0" min="-1000" max="1000" step="1" oninput="callback()">
-            <input type="text" id="x6_text" size="3" value="0" />
+            <input type="text" id="x6_text" size="3" value="0" disabled />
+            <br />
+            <label for="x0">x7</label>
             <input type="range" id="x7" value="0" min="-1000" max="1000" step="1" oninput="callback()">
-            <input type="text" id="x7_text" size="3" value="0" />
+            <input type="text" id="x7_text" size="3" value="0" disabled />
+            <br />
             <canvas id="canvasOutput"></canvas>
         </div>
     </div>
     <script type="text/javascript">
         let imgElement = document.getElementById('imageSrc');
-        let inputElement = document.getElementById('fileInput');
-        inputElement.addEventListener('change', (e) => {
-            imgElement.src = URL.createObjectURL(e.target.files[0]);
-        }, false);
 
         imgElement.onload = function () {
-            let src = cv.imread(imgElement);
-            cv.imshow('canvasOutput', src);
-            src.delete();
+            callback();
+        };
+
+        reset = function () {
+            console.log('reset');
+            for (let i = 0; i < 8; ++i) {
+                document.getElementById(`x${i}`).value = 0;
+            }
+
+            callback();
         };
 
         callback = function () {
+            console.log('callback');
             let src = cv.imread(imgElement);
 
             let x0 = document.getElementById('x0');
@@ -58,23 +84,23 @@
             let x6 = document.getElementById('x6');
             let x7 = document.getElementById('x7');
 
-            x0_text.setAttribute('value', x0.value);
+            x0_text.setAttribute('value', x0.value / 1e2);
             x1_text.setAttribute('value', x1.value);
             x2_text.setAttribute('value', x2.value);
-            x3_text.setAttribute('value', x3.value);
-            x4_text.setAttribute('value', x4.value);
-            x5_text.setAttribute('value', x5.value);
-            x6_text.setAttribute('value', x6.value);
-            x7_text.setAttribute('value', x7.value);
+            x3_text.setAttribute('value', x3.value / 5e2);
+            x4_text.setAttribute('value', x4.value / 5e2);
+            x5_text.setAttribute('value', x5.value / 5e2);
+            x6_text.setAttribute('value', x6.value / 5e4);
+            x7_text.setAttribute('value', x7.value / 5e4);
 
-            let G0 = math.multiply(math.matrix([[0, -1, 0], [1, 0, 0], [0, 0, 0]]), x0.value / 100);
+            let G0 = math.multiply(math.matrix([[0, -1, 0], [1, 0, 0], [0, 0, 0]]), x0.value / 1e2);
             let G1 = math.multiply(math.matrix([[0, 0, 1], [0, 0, 0], [0, 0, 0]]), x1.value);
             let G2 = math.multiply(math.matrix([[0, 0, 0], [0, 0, 1], [0, 0, 0]]), x2.value);
-            let G3 = math.multiply(math.matrix([[1, 0, 0], [0, 1, 0], [0, 0, -2]]), x3.value / 1e3);
-            let G4 = math.multiply(math.matrix([[1, 0, 0], [0, -1, 0], [0, 0, 0]]), x4.value / 1e3);
-            let G5 = math.multiply(math.matrix([[0, 1, 0], [1, 0, 0], [0, 0, 0]]), x5.value / 1e3);
-            let G6 = math.multiply(math.matrix([[0, 0, 0], [0, 0, 0], [1, 0, 0]]), x6.value / 3e5);
-            let G7 = math.multiply(math.matrix([[0, 0, 0], [0, 0, 0], [0, 1, 0]]), x7.value / 3e5);
+            let G3 = math.multiply(math.matrix([[1, 0, 0], [0, 1, 0], [0, 0, -2]]), x3.value / 5e2);
+            let G4 = math.multiply(math.matrix([[1, 0, 0], [0, -1, 0], [0, 0, 0]]), x4.value / 5e2);
+            let G5 = math.multiply(math.matrix([[0, 1, 0], [1, 0, 0], [0, 0, 0]]), x5.value / 5e2);
+            let G6 = math.multiply(math.matrix([[0, 0, 0], [0, 0, 0], [1, 0, 0]]), x6.value / 5e4);
+            let G7 = math.multiply(math.matrix([[0, 0, 0], [0, 0, 0], [0, 1, 0]]), x7.value / 5e4);
 
             let H_center = math.matrix([
                 [1, 0, -src.cols / 2.0],
@@ -110,13 +136,21 @@
             cv.imshow('canvasOutput', dst);
             H.delete();
             dst.delete();
+            src.delete();
 
         };
 
-
+        var Module = {
+            // https://emscripten.org/docs/api_reference/module.html#Module.onRuntimeInitialized
+            onRuntimeInitialized() {
+                callback();
+            }
+        };
     </script>
+
     <script async src="opencv.js" type="text/javascript"></script>
     <script async src="math.js" type="text/javascript"></script>
+
 </body>
 
 </html>
